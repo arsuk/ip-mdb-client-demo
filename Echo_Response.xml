@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:AdmnEchoRespV01" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <AdmnEchoResp>
+  <GrpHdr>
+   <MsgId>IDCreation</MsgId>
+   <CreDtTm>dateCreation</CreDtTm>
+  </GrpHdr>
+  <EchoResp>
+   <InstgAgt>
+    <FinInstnId>
+     <BIC>copyFromSource</BIC>
+    </FinInstnId>
+   </InstgAgt>
+   <InstdAgt>
+    <FinInstnId>
+     <BIC>INNDNL2U</BIC>
+    </FinInstnId>
+   </InstdAgt>
+   <OrgnlInstrId>copyFromSource</OrgnlInstrId>
+   <FnctnCd>731</FnctnCd>
+   <TxSts>ACTC</TxSts>
+  </EchoResp>
+ </AdmnEchoResp>
+</Document>

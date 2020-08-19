@@ -1,0 +1,69 @@
+Pooling parameter
+=================
+
+Managed Pool settings (JBoss/Wildfly pool management used for all data sources) defined in the standalone.xml as a connection definition of the resource adapter.
+
+Note: this pool is not used for MDB listener connections. These are created as static connections for the life of the MDB (a separate internal pool). Resource adapter settings such as ServerUrl and transaction support do apply for MDBs but not connection definition settings. So if you have 10 MDBs and a pools size of 20, you will have and 10 ActiveMQ connections at startup and up to 30 as you make use of the pool by requesting connections in the application.
+
+Connection definition pool settings: 
+
+    <no-tx-separate-pools> - whether separate subpools should be created for connections inside and outside JTA transactions (default false).
+
+    <min-pool-size> - the minimum number of connections in the pool (default 0 - zero)
+
+    <max-pool-size> - the maximum number of connections in the pool (default 20)
+
+    <blocking-timeout-millis> - the length of time to wait for a connection to become available when all the connections are checked out (default 5000 == 5 seconds, from 3.2.4 it is 30000 == 30 seconds)
+
+    <track-connection-by-tx> - whether the connection should be "locked" to the transaction, returning it to the pool at the end of the transaction; in pre-JBoss-5.x releases the default value for Local connection factories is true and false for XA; since JBoss-5.x the default value is true for both Local and XA and the element is deprecated.
+
+    <interleaving/> - enables interleaving for XA connection factories (this feature was added in JBoss-5.x)
+
+    <prefill> - whether to attempt to prefill the connection pool to the minimum number of connections. NOTE: only supporting pools (OnePool) support this feature. A warning can be found in the logs if the pool does not support this. This feature is available in JBoss 4.0.5 and above.
+
+    <background-validation> - In JBoss 4.0.5, background connection validation was added to reduce the overall load on the RDBMS system when validating a connection. When using this feature, JBoss will attempt to validate the current connections in the pool as a seperate thread (ConnectionValidator).
+
+    <background-validation-minutes> - The interval, in minutes, that the ConnectionValidator will run. NOTE: It is prudent to set this value to something greater or less than the <idle-timeout-minutes>
+
+    <use-fast-fail> - Whether or not to continue to attempt to acquire a connection from the pool even if the nth attempt has failed. False by default. This is to address performance issues where SQL validation may take significant time and resources to execute.
+
+There may be multiple pools with different names and settings for the same connection definition - the timeout definitions apply to all pools within the same connection definitions (so define as separate xml timeout block).
+
+blocking-timeout-millis 	    The blocking-timeout-millis element indicates the maximum time in milliseconds to block while waiting for a connection before throwing an exception. Note that this blocks only while waiting for a permit for a connection, and will never throw an exception if creating a new connection takes an inordinately long time. The default is 30000 (30 seconds).
+idle-timeout-minutes 	        The idle-timeout-minutes elements indicates the maximum time in minutes a connection may be idle before being closed. The actual maximum time depends also on the IdleRemover scan time, which is 1/2 the smallest idle-timeout-minutes of any pool.
+allocation-retry 	            The allocation retry element indicates the number of times that allocating a connection should be tried before throwing an exception. The default is 0.
+allocation-retry-wait-millis 	The allocation retry wait millis element indicates the time in milliseconds to wait between retrying to allocate a connection. The default is 5000 (5 seconds).
+xa-resource-timeout 	        Passed to XAResource.setTransactionTimeout(). Default is zero which does not invoke the setter. Specified in seconds 
+
+PooledConnectionFactory settings (ActiveMQ pooled connection factory) defined as admin-object of the resource adapter(used for getting send message connections, used temporarily and returned to pool)
+These settings have nothing to do with the wildfly managed pool settings described above.
+
+BlockIfSessionPoolIsFull(true)
+          Controls the behavior of the internal session pool.
+CreateConnectionOnStartup(false)
+          Whether to create a connection on starting this PooledConnectionFactory.
+ExpiryTimeout(0)
+          allow connections to expire, irrespective of load or idle time.
+IdleTimeout(30000)
+          Sets the idle timeout value for Connection's that are created by this pool, defaults to 30 seconds.
+MaxConnections(1)
+          Sets the maximum number of pooled Connections (defaults to one).
+MaximumActiveSessionPerConnection(0)
+          Sets the maximum number of active sessions per connection (unlimited).
+TimeBetweenExpirationCheckMillis(0)
+          Sets the number of milliseconds to sleep between runs of the idle Connection eviction thread (never, checks on new request).
+
+Pool behaviors
+--------------
+
+Managed:
+The managed pool is empty until a connection is requested. The connection remains in the pool after release by the application and is resued upon the next request. 
+The prefill and min-pool-size options do not work as you would expect with the ActiveMQ resource adapter. You get a number of active but idle entries in the pool with no open ActiveMQ connection. When a connection is requested one of the pre-allocated entries is used and the connection is opened.
+Conections stay active in the pool forever by default (I found a doc that said the idle timeout was 15 mins but this was for an old version of JBoss). When the parameter idle-time-minutes is set then connections will be closed after the idle time at the next idle scan.
+
+Pooled:
+The ActiveMQ pooled connection factory pool is empty until a new request is made. Each new request created a new pool entry until the pool is full. Subsequent pool requests will use an existing connection.
+When the connection has not been used for the idle time it will be closed. However, this check is only done when a new request is made so the time idle connections stay open may be much longer if there are no new transactions.
+What you see is that when the number of connections in ActiveMQ match the pool size and when you make a new connection request, then the idle connection are closed.
+This can be avoided by setting en expiration check time at the cost of extra overhead but this is not needed if keeping connections open does no harm or transactions are processed regularly (1 or more per 30s). 
+The CreateConnectionOnStartup option does not seem to do anything, it is probably not supported by the current resource adapter.

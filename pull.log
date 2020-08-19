@@ -1,0 +1,29 @@
+allan@pipin ~/dev/ip-mdb-demo $ git pull
+remote: Enumerating objects: 277, done.
+remote: Counting objects: 100% (277/277), done.
+remote: Compressing objects: 100% (145/145), done.
+remote: Total 262 (delta 113), reused 127 (delta 55)
+Receiving objects: 100% (262/262), 64.41 KiB | 0 bytes/s, done.
+Resolving deltas: 100% (113/113), completed with 6 local objects.
+From https://gitlab.kazan.atosworldline.com/ap-payments-nonfunctional-testing/ip-mdb-demo
+   1896903..4ca8239  master     -> origin/master
+Auto-merging src/main/webapp/ipdb.html
+CONFLICT (content): Merge conflict in src/main/webapp/ipdb.html
+CONFLICT (modify/delete): src/main/webapp/WEB-INF/ejb-jar.xml deleted in 4ca8239270b26647dc4af94daefa511a57169c00 and modified in HEAD. Version HEAD of src/main/webapp/WEB-INF/ejb-jar.xml left in tree.
+Auto-merging src/main/java/allan/demo/jms/util/XMLutils.java
+Auto-merging src/main/java/allan/demo/jms/servlet/IPTestServletDB.java
+Auto-merging src/main/java/allan/demo/jms/mdb/IPEchoRequestBean.java
+CONFLICT (rename/delete): src/main/java/allan/demo/jms/IPTimedSessionBeanResponseLogger.java deleted in 4ca8239270b26647dc4af94daefa511a57169c00 and renamed in HEAD. Version HEAD of src/main/java/allan/demo/jms/IPTimedSessionBeanResponseLogger.java left in tree.
+CONFLICT (modify/delete): src/main/java/allan/demo/jms/IPTestServletStats.java deleted in 4ca8239270b26647dc4af94daefa511a57169c00 and modified in HEAD. Version HEAD of src/main/java/allan/demo/jms/IPTestServletStats.java left in tree.
+CONFLICT (modify/delete): src/main/java/allan/demo/jms/IPTestServlet.java deleted in 4ca8239270b26647dc4af94daefa511a57169c00 and modified in HEAD. Version HEAD of src/main/java/allan/demo/jms/IPTestServlet.java left in tree.
+CONFLICT (modify/delete): src/main/java/allan/demo/jms/IPOriginatorResponseBean.java deleted in 4ca8239270b26647dc4af94daefa511a57169c00 and modified in HEAD. Version HEAD of src/main/java/allan/demo/jms/IPOriginatorResponseBean.java left in tree.
+CONFLICT (modify/delete): src/main/java/allan/demo/jms/IPDBSessionBean.java deleted in 4ca8239270b26647dc4af94daefa511a57169c00 and modified in HEAD. Version HEAD of src/main/java/allan/demo/jms/IPDBSessionBean.java left in tree.
+CONFLICT (modify/delete): src/main/java/allan/demo/jms/IPBeneficiaryRequestBean.java deleted in 4ca8239270b26647dc4af94daefa511a57169c00 and modified in HEAD. Version HEAD of src/main/java/allan/demo/jms/IPBeneficiaryRequestBean.java left in tree.
+CONFLICT (modify/delete): src/main/java/allan/demo/jms/IPBeneficiaryConfirmationBean.java deleted in 4ca8239270b26647dc4af94daefa511a57169c00 and modified in HEAD. Version HEAD of src/main/java/allan/demo/jms/IPBeneficiaryConfirmationBean.java left in tree.
+Auto-merging pom.xml
+CONFLICT (content): Merge conflict in pom.xml
+CONFLICT (modify/delete): ejb-jar.xml deleted in 4ca8239270b26647dc4af94daefa511a57169c00 and modified in HEAD. Version HEAD of ejb-jar.xml left in tree.
+Auto-merging .project
+CONFLICT (content): Merge conflict in .project
+Automatic merge failed; fix conflicts and then commit the result.
+

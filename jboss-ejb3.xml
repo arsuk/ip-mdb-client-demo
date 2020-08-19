@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<jboss xmlns="http://www.jboss.com/xml/ns/javaee"   
+    xmlns:jee="http://java.sun.com/xml/ns/javaee"  
+    xmlns:mdb="urn:resource-adapter-binding"  
+    xmlns:security="urn:security">  
+  
+    <jee:assembly-descriptor>  
+        <mdb:resource-adapter-binding>  
+            <jee:ejb-name>IPBeneficiaryRequestBean</jee:ejb-name>  
+            <mdb:resource-adapter-name>remote-artemis</mdb:resource-adapter-name>  
+        </mdb:resource-adapter-binding>  
+        <mdb:resource-adapter-binding>  
+            <jee:ejb-name>IPBeneficiaryConfirmationBean</jee:ejb-name>  
+            <mdb:resource-adapter-name>remote-artemis</mdb:resource-adapter-name>  
+        </mdb:resource-adapter-binding>  
+        <mdb:resource-adapter-binding>  
+            <jee:ejb-name>IPOriginatorResponseBean</jee:ejb-name>  
+            <mdb:resource-adapter-name>remote-artemis</mdb:resource-adapter-name>  
+        </mdb:resource-adapter-binding>  
+        <mdb:resource-adapter-binding>  
+            <jee:ejb-name>IPEchoRequestBean</jee:ejb-name>  
+            <mdb:resource-adapter-name>remote-artemis</mdb:resource-adapter-name>  
+        </mdb:resource-adapter-binding>  
+    </jee:assembly-descriptor>  
+</jboss>

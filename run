@@ -1,0 +1,15 @@
+#!/bin/bash 
+
+if [ "$1" ]; then
+    cnt=$1
+else
+    cnt=1000
+fi
+if [ "$2" ]; then
+    tps=$2
+else
+    tps=100
+fi
+
+curl "http://localhost:8080/ip-mdb-demo-1.0/iptest.html?count=$cnt&tps=$tps"
+

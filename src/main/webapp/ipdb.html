@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>IP Demo DB form</title>
+
+<script type="text/javascript">
+function OnSubmitForm1()
+{
+	document.myform1.action = 'db?id='+document.getElementById("ID").value+'&key='+document.getElementById("KEY").value;
+}
+function OnSubmitForm2()
+{
+	document.myform2.action = 'db?key=delete&id=*';
+}
+function OnSubmitForm3()
+{
+	document.myform3.action = 'db';
+}
+</script>
+</head>
+<body>
+<a id="logo" href="http://www.equensWorldline.com"><img alt="equensWorldline" height="30" width="300" src="equens.gif" /></a>
+<br/>
+<br/>
+<b>This is the IP client demo environment</b><br/>
+<pre>
+<p>
+<form name="myform1" method="post" onsubmit="OnSubmitForm1();" target="_blank" >
+    ID:                   <input type="text" id="ID" size="45" required value="*" />
+    TYPE (id or txid):    <input type="text" id="KEY" size="45" required value="id" />
+
+	<input type="submit" value="query" />
+</form>
+<form name="myform2" method="post" onsubmit="OnSubmitForm2();" target="out" >
+	<input type="submit" value="delete" />
+</form>
+<form name="myform3" method="post" onsubmit="OnSubmitForm3();" target="out" >
+	<input type="submit" value="count" />
+</form>
+</p>
+<a href="../ip-mdb-demo-1.0">Menu</a>
+<p>
+    Last Response
+    <iframe name="out" height=80 width=800/>
+</p>
+</pre>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.1">
+    <deployment>
+        <module-alias name="deployment.ip-mdb-demo"/>
+        <dependencies>
+            <module name="javax.jms.api" export="true"/>
+        </dependencies>
+    </deployment>
+</jboss-deployment-structure>

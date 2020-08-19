@@ -1,0 +1,1 @@
+cp target/ip-mdb-client-demo-1.0.war /opt/wildfly/standalone/deployments/ip-mdb-demo-1.0.war
