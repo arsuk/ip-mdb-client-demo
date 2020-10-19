@@ -24,6 +24,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /** 
  * An MDB that simulates an Instant Payments client beneficiary. 
@@ -45,6 +46,8 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
     private QueueConnectionFactory qcf;	// To get outgoing connections for sending messages
     
     private int rejectLimit=100;
+    
+	static final long SEVENSECS=7000;
     
     private Queue responseDest;
     
@@ -132,6 +135,8 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             Document msgdoc=XMLutils.stringToDoc(tm.getText());	// pacs.008 input msg
             String txid=XMLutils.getElementValue(msgdoc,"TxId");
             String status=XMLutils.getElementValue(msgdoc,"GrpSts");
+            String acceptanceTime=XMLutils.getElementValue(doc,"AccptncDtTm");
+            
             if (status==null)
             	status="";
             String reason=XMLutils.getElementValue(msgdoc,"StsRsnInf");
@@ -151,17 +156,37 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             
             XMLutils.setElementValue(doc,"OrgnlMsgId",XMLutils.getElementValue(msgdoc,"MsgId"));
             float value=0;
-            String badValueReasonCode="AM02";	// Limit reason code
             try {
+            	// Convert to float but could do a SEPA currency format check here (not needed for a demo)
             	value=Float.parseFloat(XMLutils.getElementValue(msgdoc,"IntrBkSttlmAmt"));
+            	if(value>rejectLimit||value==0) reason="AM02";	// Limit reason code
             } catch (RuntimeException e) {
-            	badValueReasonCode="FF01";	// Syntax / system error reason code
+            	reason="FF01";	// Syntax / system error reason code
             }
-            if(value>rejectLimit||value==0) {	// Reject message if value above limit to enable reject flow testing
+
+            Date aTime = null;
+            try {
+            	dateTimeFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+            	aTime = dateTimeFormat.parse(acceptanceTime);
+            } catch (Exception e) {
+            	logger.error("Bad AccptncDtTm "+acceptanceTime+" "+txid);
+            	return;
+            }
+            if (status.equals("ACCP")) {
+	            // Check timeout
+	        	long diff=new Date().getTime()-aTime.getTime();
+	        	logger.debug("Acceptance time {}",aTime);
+	        	if (diff>SEVENSECS) {
+	        		reason="AB06";	// Instructed agent timeout reject
+	        	}
+            }
+
+        	// Reject message if value above limit to enable reject flow testing or if a timeout
+            if(!reason.isEmpty()) {
             	XMLutils.setElementValue(doc,"GrpSts","RJCT");
                	Element grpInf=XMLutils.getElement(doc,"OrgnlGrpInfAndSts");
                	Element cdNode = doc.createElement("Cd");
-               	cdNode.setTextContent(badValueReasonCode);
+               	cdNode.setTextContent(reason);
                	Element rsnNode = doc.createElement("Rsn");
                	rsnNode.appendChild(cdNode);
                	Element rsnInfNode = doc.createElement("StsRsnInf");
