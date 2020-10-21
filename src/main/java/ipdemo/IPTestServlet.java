@@ -14,6 +14,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -68,7 +69,7 @@ public class IPTestServlet extends HttpServlet {
 		String creditorBIC=req.getParameter("creditorbic");
 		String debtorBIC=req.getParameter("debtorbic");
 		String destinationName=req.getParameter("queue");
-		if (destinationName==null) destinationName = "instantpayments_mybank_originator_request";
+		if (destinationName==null) destinationName = "instantpayments_mybank_originator_payment_request";
 
 		byte[] docText=XMLutils.getTemplate(templateFile);
 
@@ -116,9 +117,14 @@ public class IPTestServlet extends HttpServlet {
 					}
 					// Context lookup - JNDI name of destination must be in the ActiveMQ resource-adapter as a admin-object, or
 					// it must be messaging server subsystem as a jms-queue with JBoss / wildfly embedded AMQ 
-					Queue queue = (Queue)ic.lookup(destinationName);
 					connection = cf.createConnection();
 					Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		            Queue queue;
+		            try {
+		            	queue = (Queue)ic.lookup(destinationName);
+		        	} catch (NamingException e) {
+		                queue = session.createQueue(destinationName);            	
+		            }
 					MessageProducer publisher = session.createProducer(queue);
 
 					connection.start();

@@ -7,8 +7,13 @@
     <description>JBoss MDB</description>
     <display-name>JBoss MDB</display-name>
     <enterprise-beans>
+        <!--
+            Example ejb-jar.xml - MDB queue names IP bank demo
+            Adds the input queue names of new MDBs (ejb-name does not match existing MDB) for a bank we want
+            to simulate alongside 'mybank'. So we will have 'anadolu' as well as 'mybank'
+        --> 
         <message-driven>
-            <ejb-name>IPBeneficiaryRequestBean</ejb-name>
+            <ejb-name>IPBeneficiaryRequestBeanAnadolu</ejb-name>
             <ejb-class>ipdemo.IPBeneficiaryRequestBean</ejb-class>
             <!--  timeout-method>ejbTimeout</timeout-method> -->
             <transaction-type>Container</transaction-type>
@@ -17,11 +22,11 @@
                 <!-- Two spellings, maxSessions the for ActiveMQ resource adapter and maxSession for Artemis -->
                 <activation-config-property>
                     <activation-config-property-name>maxSessions</activation-config-property-name>
-                    <activation-config-property-value>10</activation-config-property-value>
+                    <activation-config-property-value>16</activation-config-property-value>
                 </activation-config-property>
                 <activation-config-property>
                     <activation-config-property-name>maxSession</activation-config-property-name>
-                    <activation-config-property-value>10</activation-config-property-value>
+                    <activation-config-property-value>16</activation-config-property-value>
                 </activation-config-property>
                 <activation-config-property>
                     <activation-config-property-name>destinationType</activation-config-property-name>
@@ -35,7 +40,7 @@
             </activation-config>
         </message-driven>
         <message-driven>
-            <ejb-name>IPBeneficiaryConfirmationBean</ejb-name>
+            <ejb-name>IPBeneficiaryConfirmationBeanAnadolu</ejb-name>
             <ejb-class>ipdemo.IPBeneficiaryConfirmationBean</ejb-class>
             <!--  timeout-method>ejbTimeout</timeout-method> -->
             <transaction-type>Container</transaction-type>
@@ -44,11 +49,11 @@
                 <!-- Two spellings, maxSessions the for ActiveMQ resource adapter and maxSession for Artemis -->
                 <activation-config-property>
                     <activation-config-property-name>maxSessions</activation-config-property-name>
-                    <activation-config-property-value>10</activation-config-property-value>
+                    <activation-config-property-value>16</activation-config-property-value>
                 </activation-config-property>
                 <activation-config-property>
                     <activation-config-property-name>maxSession</activation-config-property-name>
-                    <activation-config-property-value>10</activation-config-property-value>
+                    <activation-config-property-value>16</activation-config-property-value>
                 </activation-config-property>
                 <activation-config-property>
                     <activation-config-property-name>destinationType</activation-config-property-name>
@@ -62,7 +67,7 @@
             </activation-config>
         </message-driven>
         <message-driven>
-            <ejb-name>IPOriginatorResponseBean</ejb-name>
+            <ejb-name>IPOriginatorResponseBeanAnadolu</ejb-name>
             <ejb-class>ipdemo.IPOriginatorResponseBean</ejb-class>
             <!--  timeout-method>ejbTimeout</timeout-method> -->
             <transaction-type>Container</transaction-type>
@@ -71,11 +76,11 @@
                 <!-- Two spellings, maxSessions the for ActiveMQ resource adapter and maxSession for Artemis -->
                 <activation-config-property>
                     <activation-config-property-name>maxSessions</activation-config-property-name>
-                    <activation-config-property-value>10</activation-config-property-value>
+                    <activation-config-property-value>16</activation-config-property-value>
                 </activation-config-property>
                 <activation-config-property>
                     <activation-config-property-name>maxSession</activation-config-property-name>
-                    <activation-config-property-value>10</activation-config-property-value>
+                    <activation-config-property-value>16</activation-config-property-value>
                 </activation-config-property>
                 <activation-config-property>
                     <activation-config-property-name>destinationType</activation-config-property-name>
@@ -90,7 +95,7 @@
         </message-driven>
  
         <message-driven>
-            <ejb-name>IPEchoRequestBean</ejb-name>
+            <ejb-name>IPEchoRequestBeanAnadolu</ejb-name>
             <ejb-class>ipdemo.IPEchoRequestBean</ejb-class>
             <!--  timeout-method>ejbTimeout</timeout-method> -->
             <transaction-type>Container</transaction-type>

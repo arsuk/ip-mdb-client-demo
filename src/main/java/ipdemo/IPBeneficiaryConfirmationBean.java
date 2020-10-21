@@ -28,7 +28,7 @@ import java.util.TimeZone;
  */ 
 @MessageDriven(name = "IPBeneficiaryConfirmationBean", activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = "instantpayments_mybank_beneficiary_confirmation"),
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "instantpayments_mybank_beneficiary_payment_confirmation"),
         @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge")  })
 
 public class IPBeneficiaryConfirmationBean implements MessageDrivenBean, MessageListener {

@@ -7,6 +7,10 @@
     <description>JBoss MDB</description>
     <display-name>JBoss MDB</display-name>
     <enterprise-beans>
+        <!--
+            Example ejb-jar.xml - MDB queue names IP bank demo
+            Changes the input queue names of the MDBs matching ejb-name for the bank we want to simulate.
+        --> 
         <message-driven>
             <ejb-name>IPBeneficiaryRequestBean</ejb-name>
             <ejb-class>allan.demo.jms.IPBeneficiaryRequestBean</ejb-class>
@@ -14,9 +18,10 @@
             <transaction-type>Container</transaction-type>
             <message-destination-type>javax.jms.Queue</message-destination-type>
             <activation-config>
+                <!-- Two spellings, maxSessions the for ActiveMQ resource adapter and maxSession for Artemis -->
                 <activation-config-property>
                     <activation-config-property-name>maxSessions</activation-config-property-name>
-                    <activation-config-property-value>50</activation-config-property-value>
+                    <activation-config-property-value>16</activation-config-property-value>
                 </activation-config-property>
                 <activation-config-property>
                     <activation-config-property-name>destinationType</activation-config-property-name>
@@ -38,7 +43,7 @@
             <activation-config>
                 <activation-config-property>
                     <activation-config-property-name>maxSessions</activation-config-property-name>
-                    <activation-config-property-value>50</activation-config-property-value>
+                    <activation-config-property-value>16</activation-config-property-value>
                 </activation-config-property>
                 <activation-config-property>
                     <activation-config-property-name>destinationType</activation-config-property-name>
@@ -61,7 +66,7 @@
             <activation-config>
                 <activation-config-property>
                     <activation-config-property-name>maxSessions</activation-config-property-name>
-                    <activation-config-property-value>50</activation-config-property-value>
+                    <activation-config-property-value>16</activation-config-property-value>
                 </activation-config-property>
                 <activation-config-property>
                     <activation-config-property-name>destinationType</activation-config-property-name>

@@ -10,6 +10,7 @@ import javax.ejb.ActivationConfigProperty;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
 import javax.ejb.MessageDriven;
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -28,10 +29,11 @@ import java.util.Date;
 
 /** 
  * An MDB that simulates an Instant Payments client echo request / response function. 
- * It receives echo requests and replies with an echo response to show that the client is alive. 
+ * It receives echo requests and replies with an echo response to show that the client is alive.
  * 
  */
 @MessageDriven(name = "IPEchoRequestBean", activationConfig = {
+        @ActivationConfigProperty(propertyName = "maxSessions", propertyValue = "1"),
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "instantpayments_mybank_echo_request")
 })
@@ -40,11 +42,9 @@ public class IPEchoRequestBean implements MessageListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(IPEchoRequestBean.class);
 
-	static String destinationName="instantpayments_mybank_echo_response";
+	static String destinationName="instantpayments_mybank_echo_response"; // Will be replaced late if input queue name found
 	
     private QueueConnectionFactory qcf;
-
-    private Queue responseDest;
     
 	private String defaultTemplate="Echo_Response.xml"; 
     
@@ -86,11 +86,6 @@ public class IPEchoRequestBean implements MessageListener
             } catch (Exception e) {
             	logger.error("Init Error",e);
             }
-            Context ic = new InitialContext();
-            responseDest = (Queue)ic.lookup(destinationName);
-        }
-        catch (javax.naming.NameNotFoundException e) {
-        	logger.error("Init Error",e);
         } catch (NamingException e) {
             throw new EJBException("IPEchoRequest Init Exception ", e);
         }
@@ -98,8 +93,8 @@ public class IPEchoRequestBean implements MessageListener
 
     public void onMessage(Message msg)
     {
-    	if (docText==null || responseDest==null) {
-    		logger.error("Not initialised for onMessage (missing response template or destination name)");
+    	if (docText==null) {
+    		logger.error("Not initialised for onMessage (missing response template)");
     	}
     	else
         try {
@@ -127,6 +122,19 @@ public class IPEchoRequestBean implements MessageListener
             conn.start();
             QueueSession session = conn.createQueueSession(false,
                         QueueSession.AUTO_ACKNOWLEDGE);
+            // Look up destination - use the input request queue queue name and make it a response queue name
+            Destination requestQueue=msg.getJMSDestination();
+            if (requestQueue!=null) {
+            	destinationName=requestQueue.toString().replaceFirst("_request$","_response");
+            	destinationName=destinationName.replaceFirst("queue://", "");
+            }
+            Queue responseDest;
+            try {
+                Context ic = new InitialContext();
+            	responseDest = (Queue)ic.lookup(destinationName);
+        	} catch (NamingException e) {
+                responseDest = session.createQueue(destinationName);            	
+            }
             QueueSender sender = session.createSender(responseDest);
             TextMessage sendmsg = session.createTextMessage(XMLutils.documentToString(replydoc));
             sender.send(sendmsg);

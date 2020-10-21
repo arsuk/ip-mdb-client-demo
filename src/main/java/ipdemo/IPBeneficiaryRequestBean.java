@@ -11,6 +11,7 @@ import javax.ejb.EJBException;
 import javax.ejb.MessageDriven;
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -22,6 +23,8 @@ import javax.jms.QueueSession;
 import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -34,13 +37,13 @@ import java.util.TimeZone;
 @MessageDriven(name = "IPBeneficiaryRequestBean", activationConfig = {
 		//@ActivationConfigProperty(propertyName = "transaction-type", propertyValue = "Bean"),
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = "instantpayments_mybank_beneficiary_request")  })
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "instantpayments_mybank_beneficiary_payment_request")  })
 
 public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(IPBeneficiaryRequestBean.class);
 
-	static String destinationName="instantpayments_mybank_beneficiary_response";
+	static String destinationName="instantpayments_mybank_beneficiary_payment_response"; // Will be replaced late if input queue name found
 	
     private MessageDrivenContext ctx = null;
     private QueueConnectionFactory qcf;	// To get outgoing connections for sending messages
@@ -48,8 +51,6 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
     private int rejectLimit=100;
     
 	static final long SEVENSECS=7000;
-    
-    private Queue responseDest;
     
 	private String defaultTemplate="pacs.002.xml";
     
@@ -97,13 +98,7 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             // Get XML template for creating messages from a file - real application code would have a better way of doing this
             docText=XMLutils.getTemplate(defaultTemplate);
             
-            Context ic = new InitialContext();
-            responseDest = (Queue)ic.lookup(destinationName);
-            
 	       	logger.info("Started");
-        }
-        catch (javax.naming.NameNotFoundException e) {
-        	logger.error("Init Error: "+e);
         } catch (Exception e) {
             throw new EJBException("Init Exception ", e);
         }
@@ -121,8 +116,8 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
     {
         logger.trace("BeneficiaryRequest.onMessage, this="+hashCode());
         
-    	if (docText==null || responseDest==null) {
-    		logger.error("IPBeneficiaryRequest not initialised for onMessage (missing response template or destination name)");
+    	if (docText==null) {
+    		logger.error("IPBeneficiaryRequest not initialised for onMessage (missing response template)");
     	}
     	else
         try {
@@ -221,6 +216,19 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             conn.start();
             QueueSession session = conn.createQueueSession(false,
                         QueueSession.AUTO_ACKNOWLEDGE);
+            // Look up destination - use the input request queue queue name and make it a response queue name
+            Destination requestQueue=msg.getJMSDestination();
+            if (requestQueue!=null) {
+            	destinationName=requestQueue.toString().replaceFirst("_request$","_response");
+            	destinationName=destinationName.replaceFirst("queue://", "");
+            }
+            Queue responseDest;
+            try {	// Try looking up the name in the context case it is a JNDI name 
+                Context ic = new InitialContext();
+            	responseDest = (Queue)ic.lookup(destinationName);
+        	} catch (NamingException e) {
+                responseDest = session.createQueue(destinationName);            	
+            }           
             QueueSender sender = session.createSender(responseDest);
             TextMessage sendmsg = session.createTextMessage(XMLutils.documentToString(doc));
             sendmsg.setJMSType(value>rejectLimit?"RJCT":"ACCP"); // Allows for broker to use message selector
@@ -233,7 +241,7 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             if (value<0) throw new EJBException(new RuntimeException("Bad tx "+txid+" value "+value));           
         } catch(JMSException e) {
             throw new EJBException(e);
-        }
+		}
     }
 
 }

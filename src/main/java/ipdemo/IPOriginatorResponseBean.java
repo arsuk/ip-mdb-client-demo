@@ -29,7 +29,7 @@ import java.util.TimeZone;
  */
 @MessageDriven(name = "IPOriginatorResponseBean", activationConfig = {
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
-        @ActivationConfigProperty(propertyName = "destination", propertyValue = "instantpayments_mybank_originator_response"),
+        @ActivationConfigProperty(propertyName = "destination", propertyValue = "instantpayments_mybank_originator_payment_response"),
         @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge") })
 
 public class IPOriginatorResponseBean implements MessageDrivenBean, MessageListener {
