@@ -42,8 +42,6 @@ public class IPEchoRequestBean implements MessageListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(IPEchoRequestBean.class);
 
-	static String destinationName="instantpayments_mybank_echo_response"; // Will be replaced late if input queue name found
-	
     private QueueConnectionFactory qcf;
     
 	private String defaultTemplate="Echo_Response.xml"; 
@@ -123,17 +121,24 @@ public class IPEchoRequestBean implements MessageListener
             QueueSession session = conn.createQueueSession(false,
                         QueueSession.AUTO_ACKNOWLEDGE);
             // Look up destination - use the input request queue queue name and make it a response queue name
+        	String destinationName="instantpayments_mybank_echo_response";       	
             Destination requestQueue=msg.getJMSDestination();
             if (requestQueue!=null) {
-            	destinationName=requestQueue.toString().replaceFirst("_request$","_response");
+            	destinationName=requestQueue.toString();
+            	// Remove Artemis created wrapper (if any)
+            	destinationName=destinationName.replace("ActiveMQQueue[jms.queue.","");
+            	destinationName=destinationName.replace("]","");
+            	// Remove Activemq wrapper (if any)
             	destinationName=destinationName.replaceFirst("queue://", "");
+            	// Chane request to response
+            	destinationName=destinationName.replaceFirst("_request$","_response");
             }
             Queue responseDest;
             try {
                 Context ic = new InitialContext();
             	responseDest = (Queue)ic.lookup(destinationName);
         	} catch (NamingException e) {
-                responseDest = session.createQueue(destinationName);            	
+                responseDest = session.createQueue(destinationName);
             }
             QueueSender sender = session.createSender(responseDest);
             TextMessage sendmsg = session.createTextMessage(XMLutils.documentToString(replydoc));

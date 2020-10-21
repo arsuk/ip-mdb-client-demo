@@ -43,8 +43,6 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
 {
 	private static final Logger logger = LoggerFactory.getLogger(IPBeneficiaryRequestBean.class);
 
-	static String destinationName="instantpayments_mybank_beneficiary_payment_response"; // Will be replaced late if input queue name found
-	
     private MessageDrivenContext ctx = null;
     private QueueConnectionFactory qcf;	// To get outgoing connections for sending messages
     
@@ -197,7 +195,9 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             
             // Assume that we are the bank that receives the credit so use the pacs.008 CdtrAgt BIC as our BIC
             // This makes this test code work as an answering machine for any bank (in real life this should be checked)
-            String creditorBIC=XMLutils.getElementValue(XMLutils.getElement(msgdoc,"CdtrAgt"),"BIC");
+            Element credAgt=XMLutils.getElement(msgdoc,"CdtrAgt");
+            if (credAgt==null) throw new EJBException(new RuntimeException("Missing CdtrAgt"));
+            String creditorBIC=XMLutils.getElementValue(credAgt,"BIC");
             XMLutils.setElementValue(XMLutils.getElement(doc,"InstgAgt"),"BIC",creditorBIC);           
 
             // Simulate work if specified in RmtInf Ustrd or if a delay is specified by a system property.
@@ -217,10 +217,17 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             QueueSession session = conn.createQueueSession(false,
                         QueueSession.AUTO_ACKNOWLEDGE);
             // Look up destination - use the input request queue queue name and make it a response queue name
+        	String destinationName="instantpayments_mybank_beneficiary_payment_response";
             Destination requestQueue=msg.getJMSDestination();
             if (requestQueue!=null) {
-            	destinationName=requestQueue.toString().replaceFirst("_request$","_response");
+            	destinationName=requestQueue.toString();
+            	// Remove Artemis created wrapper (if any)
+            	destinationName=destinationName.replace("ActiveMQQueue[jms.queue.","");
+            	destinationName=destinationName.replace("]","");
+            	// Remove Activemq wrapper (if any)
             	destinationName=destinationName.replaceFirst("queue://", "");
+            	// Chane request to response
+            	destinationName=destinationName.replaceFirst("_request$","_response");
             }
             Queue responseDest;
             try {	// Try looking up the name in the context case it is a JNDI name 
