@@ -17,8 +17,10 @@ public class PrivatePool {
     // <simple name="java:global/ActiveMQhostStr" value="failover:tcp://localhost:61616"/>
 	//
 	// This code is provided as an example of defining a private connection pool (not container managed)
-	// which may be useful for accessing ActiveMQ features. It is usually simpler to define one or more
-	// pools in the application server (standalone.xml for JBoss / Wildfly).
+	// which may be useful for accessing ActiveMQ features. It can also be useful to create a pool which is
+	// not defined with XA transaction management which may be the case with the managed pools. 
+	// It is usually simpler to define one or more managed pools in the application server
+	// (standalone.xml for JBoss / Wildfly).
 
 	static PooledConnectionFactory createPrivatePool(InitialContext iniCtx, Logger logger) {
 		String hostStr=System.getProperty("ActiveMQhostStr");

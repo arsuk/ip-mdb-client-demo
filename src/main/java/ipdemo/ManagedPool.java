@@ -12,7 +12,7 @@ public class ManagedPool {
 	static private QueueConnectionFactory privateManagedConnectionFactory=null;
 
 	// Lookup system property "ConnectionFactory" to find out which pool we should use.
-	// If not found we use the pool defined in the standalone.xml for JBoss / Wildfly.
+	// If not found we use the connection factory and pool defined in the default standalone.xml for JBoss / Wildfly.
 
 	static QueueConnectionFactory getPool(InitialContext iniCtx, Logger logger) throws NamingException {
     	// Use an application server defined ActiveMQ connection pool using a JNDI name from a system property
