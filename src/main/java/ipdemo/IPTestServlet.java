@@ -128,7 +128,7 @@ public class IPTestServlet extends HttpServlet {
 					MessageProducer publisher = session.createProducer(queue);
 
 					connection.start();
-					logger.info("Connected");
+					logger.info("Connected - queue "+queue);
 					
 					TextMessage message = session.createTextMessage();
 

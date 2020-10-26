@@ -6,21 +6,27 @@ It is also a basic test framework that uses the same interfaces that we recommen
 this application simulates one test bank.
 
 It consisists of servlets for creating the payment messages and showing the stats of the resulting messages, and message
-driven beans that simulate the client business processes. These are deployed within an instance of Wildfly. The queue names
-that the beans listen to are defined in the ip-mdb-demo-x.x.war file ejb-jar.xml file. The ActiveMQ connections are defined
-in the Wildfly or JBoss standalone-amq.xml configuration file.
+driven beans (MDBs) that simulate the client business processes. These are deployed within an instance of Wildfly. The 
+queue names that the beans listen can be defined in the ip-mdb-demo-x.x.war file ejb-jar.xml file. The ActiveMQ connections
+for queues that have to be looked up by the application (send queues) can be defined in the Wildfly or JBoss 
+standalone-amq.xml configuration file. These are:
+1) instantpayments_mybank_originator_payment_request (lookup in the IPTestServlet)
+2) instantpayments_mybank_beneficiary_payment_response (lookup in the IPBeneficiaryRequestBean)
+3) instantpayments_mybank_echo_response (lookup in the IPEchoRequestBean)
+If the filenames are not mapped in the configuration files then the 'mybank' names are used as shown below. It is possble
+to define multiple sets of beans to simulate multiple banks if so desired.
 
 The process flow is as follows:
 
-IPTestServlet -------------------> ip_mybank_originator_payment_request -----------> IP CSM
+IPTestServlet -------------------> instantpayments_mybank_originator_payment_request -----------> IP CSM
 
-IPBeneficiaryRequestBean <-------- ip_mybank_beneficiary_payment_request <---------- IP CSM
+IPBeneficiaryRequestBean <-------- instantpayments_mybank_beneficiary_payment_request <---------- IP CSM
            |
-           |---------------------> ip_mybank_beneficiary_payment_response ---------> IP CSM
+           |---------------------> instantpayments_mybank_beneficiary_payment_response ---------> IP CSM
 
-IPoriginatorResponseBean <-------- ip_mybank_originator_payment_response <---------- IP CSM
+IPoriginatorResponseBean <-------- instantpayments_mybank_originator_payment_response <---------- IP CSM
 
-IPBeneficiaryConfirmation <------- ip_mybank_beneficiary_payment_confirmation <----- IP CSM
+IPBeneficiaryConfirmation <------- instantpayments_mybank_beneficiary_payment_confirmation <----- IP CSM
 
 Note that the queue names used are configurable as described below in the 'Running the demo' section.
 
@@ -39,27 +45,29 @@ to run two instances of Wildfy/JBoss and configure then with different queue nam
 The package also includes an IPechoRresponseBean. It response to a CSM's echo request with a response message indicating
 that the test bank is active.
 
-IPEchoRequestBean <--------------- ip_mybank_echo_request <----------------- CSM
+IPEchoRequestBean <--------------- instantpayments_mybank_echo_request <----------------- CSM
             |
-            |--------------------> ip_mybank_echo_response ----------------> CSM
+            |--------------------> instantpayments_mybank_echo_response ----------------> CSM
 
+The IPEchoRequestBean assumes that the response queue has the same name as the MDB input queue but with 'request' replaced
+with 'response' which allows for multiple bank MDBs and IDs within the demo.
 The example can be run without Instant Payments to simulate and test the queue interactions in a stand alone mode. To do
 this you define in the standalone-amq.xml file that the originator request queue's physical name is the beneficiary queue.
 In this way we bybass the originator request queue and the IPservlet will send its message directly to the 
 IPbeneficiaryRequestBean. The beneficiary response queue must similarly entry in the standalone-amq.xml must be defined
 with the originator response queue so that the messages are directly send to the IPoriginatorResponseBean.
   
-IPtestServlet -------------------> ip_mybank_originator_payment_request
+IPtestServlet -------------------> instantpayments_mybank_originator_payment_request
                                                    |
                                                    | Renamed in standalone JNDI definition
                                                    V
-IPbeneficiaryRequestBean <-------- ip_mybank_beneficiary_payment_request
+IPbeneficiaryRequestBean <-------- instantpayments_mybank_beneficiary_payment_request
            |
-           |---------------------> ip_mybank_beneficiary_payment_response
+           |---------------------> instantpayments_mybank_beneficiary_payment_response
                                                    |
                                                    | Renamed in standalone JNDI definition
                                                    V
-IPoriginatorResponseBean <-------- ip_mybank_originator_payment_response 
+IPoriginatorResponseBean <-------- instantpayments_mybank_originator_payment_response 
 
 pacs template files
 ===================
@@ -85,8 +93,9 @@ IPTestServlet
 =============
 The servlet creates one or more payment messages. The XML is read from the pacs.008.xml template. It adjusts dates, the
 message IDs and transacionIDs with unique values. The transaction can be provided as a paramter along with the number of
-messages wanted (the count) and the TPS rate at which they should be submitted. The servlet also has a paremeter for
-selecting alternative template files so you can test with different data values.
+messages wanted (the count) and the TPS rate at which they should be submitted. The request queue name and BICs can also
+be adjusted by the servlet. The servlet has a parameter for selecting alternative template files so you can test with
+different data values for items that the servlet has no parameters.
 
 IPStatsServlet
 ==============
