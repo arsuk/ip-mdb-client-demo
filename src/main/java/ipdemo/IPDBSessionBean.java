@@ -124,9 +124,9 @@ public class IPDBSessionBean  {
 				if (id.equals("%"))
 					sql = "SELECT * FROM TXTABLE WHERE txid IN (SELECT txid FROM TXTABLE WHERE datetime = SELECT max(datetime) FROM TXTABLE)";
 				else if (id.contains("%"))
-					sql = "SELECT TYPE,ID,TXID,DATETIME,MSG FROM TXTABLE WHERE " + key + " LIKE '" + id + "' LIMIT 100";
+					sql = "SELECT * FROM TXTABLE WHERE " + key + " LIKE '" + id + "' LIMIT 100";
 				else
-					sql = "SELECT TYPE,ID,TXID,DATETIME,MSG FROM TXTABLE WHERE " + key + " = '" + id + "'";
+					sql = "SELECT * FROM TXTABLE WHERE " + key + " = '" + id + "'";
 				ResultSet rs = st.executeQuery(sql);
 				data = "";
 				int cnt = 0;
