@@ -3,7 +3,7 @@ The IP MDB based interfacing demonstration
 The ip-mdb-demo is a simulation of a client system that interacts with the IP CSM. It provides a coding example for the
 developers of client implementations.
 It is also a basic test framework that uses the same interfaces that we recommend customers to use. One deployment of
-this application simulates one test bank.
+this application simulates one test bank. You can define more MDBs and queue names to simulate more than one bank.
 
 It consisists of servlets for creating the payment messages and showing the stats of the resulting messages, and message
 driven beans (MDBs) that simulate the client business processes. These are deployed within an instance of Wildfly. The 
@@ -136,5 +136,6 @@ http://localhost:8080/ip-mdb-demo-1.0/test/?count=1000&tps=10&value=50
 And to see the stats:
 http://localhost:8080/ip-mdb-demo-1.0/stats
 
-The demo can be configured to run with a database for tracking transactions. It also has log file options.
+The demo can be configured to run with a database for tracking transactions. It also has log file options. These are configured 
+using system variables and resource definitions in the standalone.xml.
 
