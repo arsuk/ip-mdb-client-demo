@@ -245,7 +245,7 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             conn.close();	// Return connection to the pool
            
             // Throw exception on bad value to test rollback error handling - real applications code would reject the message
-            if (value<0) throw new EJBException(new RuntimeException("Bad tx "+txid+" value "+value));           
+            if (value<0 && !msg.getJMSRedelivered()) throw new EJBException(new RuntimeException("Bad tx "+txid+" value "+value));           
         } catch(JMSException e) {
             throw new EJBException(e);
 		}

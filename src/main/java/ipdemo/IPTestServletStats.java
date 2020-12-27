@@ -64,20 +64,24 @@ public class IPTestServletStats extends HttpServlet {
        	writer.println(
        			"Originator Response count "+origDiff+
        			", Av.Resp "+(IPOriginatorResponseBean.averageResponse)+
-       			", Errors "+(IPOriginatorResponseBean.errorCount-lastErrorCount)+
-       			", Late "+(IPOriginatorResponseBean.lateCount-lastLateCount)+
+       			", Errors "+(IPOriginatorResponseBean.totalErrorCount-lastErrorCount)+
+       			", Late "+(IPOriginatorResponseBean.totalLateCount-lastLateCount)+
        			", TPS "+String.format("%.1f", (float)origDiff/diffSecs));
        	writer.println(       	
         		"Beneneficiary Confirmation count "+beneDiff+
         		", Av.Resp "+(IPBeneficiaryConfirmationBean.averageResponse)+
        			", TPS "+String.format("%.1f", (float)beneDiff/diffSecs));
+       	writer.println("\nTotals: responses "+IPOriginatorResponseBean.totalCount+
+       			", confirmations "+IPBeneficiaryConfirmationBean.totalCount+
+       			", errors "+IPOriginatorResponseBean.totalErrorCount+
+       			", late "+IPOriginatorResponseBean.totalLateCount);
 
        	lastSendCount=IPTestServlet.totalSendCount;
        	lastBeneficiaryCount=IPBeneficiaryConfirmationBean.totalCount;
         lastOriginatorCount=IPOriginatorResponseBean.totalCount;
        	lastTime=System.currentTimeMillis();
-       	lastErrorCount=IPOriginatorResponseBean.errorCount;
-       	lastLateCount=IPOriginatorResponseBean.lateCount;
+       	lastErrorCount=IPOriginatorResponseBean.totalErrorCount;
+       	lastLateCount=IPOriginatorResponseBean.totalLateCount;
     }
     
     @Override

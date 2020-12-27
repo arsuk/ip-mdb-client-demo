@@ -5,14 +5,26 @@
 <title>IP Demo stats form</title>
 
 <script type="text/javascript">
+var stated=false;
 function OnSubmitForm()
 {
 	document.myform.action = 'stats';
+    started=true;
+}
+window.onload=function(){ 
+    var interval = setInterval(function() {
+            redirect();
+    }, 10000);
+};
+function redirect() {
+    if (started) {
+        document.myform.submit();
+    }
 }
 </script>
 </head>
 <body>
-<a id="logo" href="http://www.equensWorldline.com"><img alt="equensWorldline" height="30" width="300" src="equens.gif" /></a>
+<a id="logo" href="http://www.equensWorldline.com"><img alt="equensWorldline" height="30" width="240" src="equens.gif" /></a>
 <br/>
 <br/>
 <b>This is the IP client demo environment</b><br/>
@@ -25,7 +37,7 @@ function OnSubmitForm()
 <a href="../ip-mdb-demo-1.0">Menu</a>
 <p>
     Last Response
-    <iframe name="out" height=80 width=800/>
+    <iframe name="out" height=100 width=800/>
 </p>
 </pre>
 </body>

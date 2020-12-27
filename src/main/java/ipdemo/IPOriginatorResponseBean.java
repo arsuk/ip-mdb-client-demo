@@ -46,6 +46,8 @@ public class IPOriginatorResponseBean implements MessageDrivenBean, MessageListe
     public static long maxResponse=0;
     public static long errorCount=0;
     public static long lateCount=0;
+    public static long totalErrorCount=0;
+    public static long totalLateCount=0;
     public static long averageResponse=0;	// Displayed in StatsServlet, displayed and updated in SessionBeanResponseLogger timer task
 
     private int workSimulationDelay=0;
@@ -113,10 +115,16 @@ public class IPOriginatorResponseBean implements MessageDrivenBean, MessageListe
 
         	count++;
             totalCount++;
-            if (sts==null || !sts.equals("ACCP")) errorCount++;	// Anything apart from acceptance is an error...
+            if (sts==null || !sts.equals("ACCP")) {
+            	errorCount++;	// Anything apart from acceptance is a reject error...
+            	totalErrorCount++;
+            }
             if (origTime!=null) {
             	long diff=new Date().getTime()-origTime.getTime();
-            	if (diff>5000) lateCount++;	// SLA 5s
+            	if (diff>5000) {
+            		lateCount++;	// SLA 5s
+            		totalLateCount++;
+            	}
            		totalResp=totalResp+diff;
            		if (diff<minResponse||minResponse==0) minResponse=diff;
            		if (diff>maxResponse) maxResponse=diff;
