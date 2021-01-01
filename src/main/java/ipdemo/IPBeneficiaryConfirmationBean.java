@@ -85,6 +85,10 @@ public class IPBeneficiaryConfirmationBean implements MessageDrivenBean, Message
             if (reason==null) reason="";
             else reason=reason.trim();
 
+            if (status==null || txid==null) {
+            	logger.warn("Illegal message "+msgText);
+            	return;
+            }
             if (dbSessionBean.getTXstatus(id)==null)
             	dbSessionBean.insertTX(id,txid,"confirmation",status,reason,msgText);
             else
@@ -101,8 +105,11 @@ public class IPBeneficiaryConfirmationBean implements MessageDrivenBean, Message
          	// Simulate work
            	try {Thread.sleep(workSimulationDelay);} catch (InterruptedException ie) {};
 
-            count++;
-            totalCount++;
+
+            synchronized(this){
+                count++;
+                totalCount++;
+            }
          	if (writer!=null) {
          		writer.write(msgText+"\n");
          	}

@@ -129,7 +129,11 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             String txid=XMLutils.getElementValue(msgdoc,"TxId");
             String status=XMLutils.getElementValue(msgdoc,"GrpSts");
             String acceptanceTime=XMLutils.getElementValue(doc,"AccptncDtTm");
-            
+
+            if (txid==null) {
+            	logger.warn("Illegal message "+tm.getText());
+            	return;
+            }            
             if (status==null)
             	status="";
             String reason=XMLutils.getElementValue(msgdoc,"StsRsnInf");
@@ -217,7 +221,7 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             QueueSession session = conn.createQueueSession(false,
                         QueueSession.AUTO_ACKNOWLEDGE);
             // Look up destination - use the input request queue queue name and make it a response queue name
-        	String destinationName="instantpayments_mybank_beneficiary_payment_response";
+        	String destinationName="instantpayments_mybank_beneficiary_payment_response";	// Default if input queue not found
             Destination requestQueue=msg.getJMSDestination();
             if (requestQueue!=null) {
             	destinationName=requestQueue.toString();

@@ -1,0 +1,80 @@
+Demo Settings
+=============
+
+Wildfly standalone.xml
+
+The ip-mdb-client-demo can be used witout a DB datasource. No duplicate check or DB queries will work but transaction load can be generated.
+Settings can be set as system properties or as bindings.
+
+System settings:
+
+    <system-properties>
+        <property name="IPdatasource" value="jboss/datasources/ExampleDS"/> <!-- JNDI name DB datasource -->
+        <property name="IPRequestDelay" value="0"/>     <!-- Delay (ms) processing beneficiary payment request -->
+        <property name="IPResponseDelay" value="0"/>    <!-- Delay (ms) processing originator payment response -->
+        <property name="IPConfirmationDelay" value="0"/>    <!-- Delay (ms) processing payment confirmation -->
+        <property name="IPresponseLog" value="msglogfile.log"/>    <!-- If present log response messages -->
+        <!-- following entries only used for outbound messaging which is not managed by Wildfly! -->
+        <property name="ActiveMQhostStr" value="tcp://localhost:61618"/>
+        <property name="ActiveMQuser" value="admin"/>
+        <property name="ActiveMQpassword" value="admin"/>
+        <!-- following used if the above ActiveMQ entries not present - normal usage, default if not present -->
+        <property name="ConnectionFactory" value="ConnectionFactory"/>  <!-- JNDI name -->
+        <!--property name="ConnectionFactory" value="jms/connection/amq/pooled"/-->
+    </system-properties>
+
+Binding settings as alternative for system properties:
+
+        <subsystem xmlns="urn:jboss:domain:naming:2.0">
+            <bindings>
+                <!-- following can also be defined as system properties -->
+                <simple name="java:global/IPdatasource" value="jboss/datasources/ExampleDS"/>
+                <simple name="java:global/ConnectionFactory" value="ConnectionFactory"/>
+                <!-- Following overrides above and it not recommented except for test -->
+                <simple name="java:global/ActiveMQhostStr" value="tcp://localhost:61618"/>
+                <simple name="java:global/ActiveMQuser" value="admin"/>
+                <simple name="java:global/ActiveMQpassword" value="admin"/>
+            </bindings>
+            <remote-naming/>
+        </subsystem>
+
+Queue names do not need to be defined in standalone.xml. The MDB receive queue names are configured in the deployment package file ejb-jar.xml.
+The default MDB queue names have 'mybank' as a bank identifer. This can be changed using ejb-jar.xml and additional bank MDBs can be added. 
+Receiving queues are (per bank): 
+    instantpayments_mybank_beneficiary_payment_request
+    instantpayments_mybank_originator_payment_response
+    instantpayments_mybank_beneficiary_payment_confirmation
+    instantpayments_mybank_echo_request
+Sending queue names are derived from the MDB receive queue name. 
+However the application does a JNDI lookup before openning a queue for sending so the physical queue name can be changed in standalone.xml.
+The sending queues (which do not need to be configured) are shown below for ActiveMQ Artemis configurations.
+
+        <subsystem xmlns="urn:jboss:domain:messaging-activemq:7.0">
+            <server name="default">
+                ........
+                ........
+                <jms-queue name="instantpayments_mybank_originator_payment_request" entries="instantpayments_mybank_originator_payment_request"/>
+                <jms-queue name="instantpayments_mybank_beneficiary_payment_response" entries="instantpayments_mybank_beneficiary_payment_response"/>
+                <jms-queue name="instantpayments_mybank_echo_response" entries="instantpayments_mybank_echo_response"/>
+            </server>
+        </subsystem>
+
+One example of when you might want to lookup a different queue name is if you want to bypass the CSM by sending the payment request directly to the
+beneficiary request queue when the application sends it to the originator request queue (that the CSM is waiting on). The beneficiary MDB will
+respond with a payment response to the beneficiary payment response queue. This can be redirected to the originator response queue.
+You can then run the ip-mdb-client-demo in a loopback mode without a CSM.
+                <jms-queue name="instantpayments_mybank_beneficiary_payment_request" entries="instantpayments_mybank_originator_payment_request"/>
+                <jms-queue name="instantpayments_mybank_originator_payment_response" entries="instantpayments_mybank_beneficiary_payment_response"/>
+
+If the ActiveMQ is being used with the activemq-rar.rar resource adapter then the syntax for the adapter section for the anadolu bank is:
+                        <admin-object class-name="org.apache.activemq.command.ActiveMQQueue" jndi-name="java:/instantpayments_anadolu_originator_payment_request" use-java-context="true" pool-name="instantpayments_anadolu_originator_payment_request">
+                            <config-property name="PhysicalName">
+                                instantpayments_anadolu_beneficiary_payment_request
+                            </config-property>
+                        </admin-object>
+                        <admin-object class-name="org.apache.activemq.command.ActiveMQQueue" jndi-name="java:/instantpayments_anadolu_beneficiary_payment_response" use-java-context="true" pool-name="instantpayments_anadolu_beneficiary_payment_response">
+                            <config-property name="PhysicalName">
+                                instantpayments_anadolu_originator_payment_response
+                            </config-property>
+                        </admin-object>
+

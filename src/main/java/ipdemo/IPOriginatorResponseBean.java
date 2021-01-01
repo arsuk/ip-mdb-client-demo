@@ -93,6 +93,10 @@ public class IPOriginatorResponseBean implements MessageDrivenBean, MessageListe
             String reason=XMLutils.getElementValue(msgdoc,"StsRsnInf");
             if (reason==null) reason="";
 
+            if (status==null || txid==null) {
+            	logger.warn("Illegal message "+msgText);
+            	return;
+            }
             //logger.info(String.format("TestBean Message, %s", msgText));
             if (dbSessionBean.getTXinfo(id)==null)
             	dbSessionBean.insertTX(id,txid,"response",status.trim(),reason.trim(),msgText);
@@ -113,21 +117,23 @@ public class IPOriginatorResponseBean implements MessageDrivenBean, MessageListe
            	try {Thread.sleep(workSimulationDelay);} catch (InterruptedException ie) {logger.error("Sleep "+ie);};
            	logger.debug("Work simulation {}",workSimulationDelay);
 
-        	count++;
-            totalCount++;
-            if (sts==null || !sts.equals("ACCP")) {
-            	errorCount++;	// Anything apart from acceptance is a reject error...
-            	totalErrorCount++;
-            }
-            if (origTime!=null) {
-            	long diff=new Date().getTime()-origTime.getTime();
-            	if (diff>5000) {
-            		lateCount++;	// SLA 5s
-            		totalLateCount++;
-            	}
-           		totalResp=totalResp+diff;
-           		if (diff<minResponse||minResponse==0) minResponse=diff;
-           		if (diff>maxResponse) maxResponse=diff;
+           	synchronized (this) {	// Avoid counter update errors multiple bean instances
+           		count++;
+           		totalCount++;
+                if (sts==null || !sts.equals("ACCP")) {
+                	errorCount++;	// Anything apart from acceptance is a reject error...
+                	totalErrorCount++;
+                }	
+	            if (origTime!=null) {
+	            	long diff=new Date().getTime()-origTime.getTime();
+	            	if (diff>5000) {
+	            		lateCount++;	// SLA 5s
+	            		totalLateCount++;
+	            	}
+	           		totalResp=totalResp+diff;
+	           		if (diff<minResponse||minResponse==0) minResponse=diff;
+	           		if (diff>maxResponse) maxResponse=diff;
+	           	}
            	}
            
          	if (writer!=null) {

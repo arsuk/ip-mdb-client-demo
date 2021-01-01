@@ -18,7 +18,8 @@ public class ManagedPool {
     	// Use an application server defined ActiveMQ connection pool using a JNDI name from a system property
 		String cfStr=System.getProperty("ConnectionFactory");
 		// If the system property is not defined use the JNDI name used by the JBoss standalone-full.xml example 
-		if (cfStr==null) cfStr="/ConnectionFactory";
+		if (cfStr==null) cfStr="ConnectionFactory";
+		if (!cfStr.startsWith("/")) cfStr="/"+cfStr;
 
 		Object cf = iniCtx.lookup(cfStr);
 		privateManagedConnectionFactory = (QueueConnectionFactory) cf;
