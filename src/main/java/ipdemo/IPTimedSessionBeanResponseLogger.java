@@ -6,7 +6,11 @@ import javax.ejb.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
- 
+/**
+ * A time bean that logs MDB processing statistics in the JBoss/Wildfly log file. 
+ * @author Allan Smith
+ *
+ */ 
 @Singleton
 public class IPTimedSessionBeanResponseLogger {
 	private static final Logger logger = LoggerFactory.getLogger(IPTimedSessionBeanResponseLogger.class);

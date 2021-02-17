@@ -24,7 +24,12 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
- 
+/**
+ * A Servlet which executes http requests for test statistics. The MDBs keep counts in static public variables
+ * which are displayed by this servlet. 
+ * @author Allan Smith
+ *
+ */ 
 @WebServlet("/stats")
 public class IPTestServletStats extends HttpServlet {
 

@@ -5,8 +5,12 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.slf4j.Logger;
-
-
+/** 
+ * Get connection from the Wildfly message queue connection pool<br/>
+ * The connection pool is identified by looking up a system property or JNDI property with the name ConnectionFactory. 
+ * @author Allan Smith
+ * 
+ */
 public class ManagedPool {
 
 	static private QueueConnectionFactory privateManagedConnectionFactory=null;

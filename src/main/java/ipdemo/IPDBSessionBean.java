@@ -15,7 +15,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
- 
+/**
+ * A session bean that implements all DB queries for the demo. If no datasource is defined as (due to error or because no IPdatasource
+ * property is defined) then no DB is used by the demo. Queries and updates are ignored.
+ * @author Allan Smith
+ *
+ */
 @Stateless
 public class IPDBSessionBean  {
 	private static final Logger logger = LoggerFactory.getLogger(IPDBSessionBean.class);

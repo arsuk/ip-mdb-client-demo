@@ -25,7 +25,12 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-
+/**
+ * A Servlet which executes test http requests querying data from the demo DB tables. The queries are translated
+ * into callss to the DB session bean. 
+ * @author Allan Smith
+ *
+ */
 @WebServlet("/test")
 public class IPTestServlet extends HttpServlet {
 	private static final Logger logger = LoggerFactory.getLogger(IPTestServlet.class);
@@ -129,7 +134,12 @@ public class IPTestServlet extends HttpServlet {
 
 					connection.start();
 					logger.info("Connected - queue "+queue);
-					
+					/**
+					 * A session bean that implements all DB queries for the demo. If no datasource is defined as (due to error or because no IPdatasource
+					 * property is defined) then no DB is used by the demo. Queries and updates are ignored.
+					 * @author Allan Smith
+					 *
+					 */				
 					TextMessage message = session.createTextMessage();
 
 					long startTime=System.currentTimeMillis();

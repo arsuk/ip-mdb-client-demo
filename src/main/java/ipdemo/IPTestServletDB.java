@@ -25,7 +25,11 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
- 
+/**
+ * A Servlet which execute test http requests. It creates test messages in a specified payment request queue. 
+ * @author Allan Smith
+ *
+ */ 
 @WebServlet("/db")
 public class IPTestServletDB extends HttpServlet {
 

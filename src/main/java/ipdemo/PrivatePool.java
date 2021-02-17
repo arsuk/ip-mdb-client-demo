@@ -6,7 +6,14 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.jms.pool.PooledConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/** 
+ * Get connection from a private queue connection pool<br/>
+ * A private pool is not managed by Wildfly and is created as a static option. This is only useful for test purposes such
+ * as avoiding transaction management or specifying an alternative broker host. If the property, ActiveMQhostStr, 
+ * does not exist then the pool is not created and the calling code must use the managed pool. 
+ * @author Allan Smith
+ * 
+ */
 public class PrivatePool {
 
 	static private PooledConnectionFactory privatePooledConnectionFactory=null;

@@ -1,6 +1,5 @@
 package ipdemo;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
@@ -19,7 +18,12 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
+/** 
+ * Class for XML handling procedures used by multiple classes<br/>
+ * These are wrapper procedures around the Java XML Document class. 
+ * @author Allan Smith
+ * 
+ */
 public class XMLutils {
 	private static final Logger logger = LoggerFactory.getLogger(XMLutils.class);
 	
