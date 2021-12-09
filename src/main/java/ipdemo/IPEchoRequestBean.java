@@ -33,7 +33,8 @@ import java.util.Date;
  * 
  */
 @MessageDriven(name = "IPEchoRequestBean", activationConfig = {
-        @ActivationConfigProperty(propertyName = "maxSessions", propertyValue = "1"),
+        @ActivationConfigProperty(propertyName = "maxSession", propertyValue = "1"),	// Artemis property
+        @ActivationConfigProperty(propertyName = "maxSessions", propertyValue = "1"),	// ActiveMQ property
         @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
         @ActivationConfigProperty(propertyName = "destination", propertyValue = "instantpayments_mybank_echo_request")
 })
@@ -43,6 +44,8 @@ public class IPEchoRequestBean implements MessageListener
 	private static final Logger logger = LoggerFactory.getLogger(IPEchoRequestBean.class);
 
     private QueueConnectionFactory qcf;
+    
+    private Destination requestQueue=null;
     
 	private String defaultTemplate="Echo_Response.xml"; 
     
@@ -120,9 +123,12 @@ public class IPEchoRequestBean implements MessageListener
             conn.start();
             QueueSession session = conn.createQueueSession(false,
                         QueueSession.AUTO_ACKNOWLEDGE);
-            // Look up destination - use the input request queue queue name and make it a response queue name
-        	String destinationName="instantpayments_mybank_echo_response";       	
-            Destination requestQueue=msg.getJMSDestination();
+            // Look up input destination - use the input request queue queue name and make it a response queue name
+        	if (requestQueue==null) {
+        		requestQueue=msg.getJMSDestination();	// This is the queue to which this MDB is listening
+        		logger.info("Listening to: {}",requestQueue);
+        	}
+           	String destinationName="instantpayments_mybank_echo_response";
             if (requestQueue!=null) {
             	destinationName=requestQueue.toString();
             	// Remove Artemis created wrapper (if any)

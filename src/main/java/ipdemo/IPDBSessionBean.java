@@ -124,9 +124,9 @@ public class IPDBSessionBean  {
 				con = ds.getConnection();
 				st = con.createStatement();
 				String sql;
-				if (!key.equalsIgnoreCase("ID")&&!key.equalsIgnoreCase("ID"))
+				if (!key.equalsIgnoreCase("ID")&&!key.equalsIgnoreCase("TXID"))
 					key="ID";
-				if (id.equals("%"))
+				if (id.equals("*"))
 					sql = "SELECT * FROM TXTABLE WHERE txid IN (SELECT txid FROM TXTABLE WHERE datetime = SELECT max(datetime) FROM TXTABLE)";
 				else if (id.contains("%"))
 					sql = "SELECT * FROM TXTABLE WHERE " + key + " LIKE '" + id + "' LIMIT 100";
@@ -138,12 +138,12 @@ public class IPDBSessionBean  {
 				while (rs.next()) {
 					cnt++;
 					data = data + "\n" +
-							rs.getString("TYPE") + "\n" +
-							rs.getString("ID") + "\n" +
-							rs.getString("TXID") + "\n" +
-							rs.getString("STATUS") + "\n" +
-							rs.getString("REASON") + "\n" +
-							rs.getString("DATETIME") + "\n" +
+							"Type: "+rs.getString("TYPE") + "\n" +
+							"ID  : "+rs.getString("ID") + "\n" +
+							"TxID: "+rs.getString("TXID") + "\n" +
+							"Sts : "+rs.getString("STATUS") + "\n" +
+							"Rsn : "+rs.getString("REASON") + "\n" +
+							"DtTm: "+rs.getString("DATETIME") + "\n" +
 							rs.getString("MSG");
 				}
 				rs.close();
@@ -258,6 +258,7 @@ public class IPDBSessionBean  {
             stmt.executeUpdate(sql);
             stmt.executeUpdate("CREATE INDEX dtIndex ON TXTABLE (datetime)");
             stmt.executeUpdate("CREATE INDEX txidIndex ON TXTABLE (txid)");
+            stmt.executeUpdate("CREATE INDEX idIndex ON TXTABLE (id)");
             stmt.close();
         	logger.info("Initialized - table created.");
 

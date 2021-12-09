@@ -180,6 +180,7 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
 
         	// Reject message if value above limit to enable reject flow testing or if a timeout
             if(!reason.isEmpty()) {
+            	status="RJCT";
             	XMLutils.setElementValue(doc,"GrpSts","RJCT");
                	Element grpInf=XMLutils.getElement(doc,"OrgnlGrpInfAndSts");
                	Element cdNode = doc.createElement("Cd");
@@ -242,7 +243,7 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             }           
             QueueSender sender = session.createSender(responseDest);
             TextMessage sendmsg = session.createTextMessage(XMLutils.documentToString(doc));
-            sendmsg.setJMSType(value>rejectLimit?"RJCT":"ACCP"); // Allows for broker to use message selector
+            sendmsg.setJMSType(status); // Allows for broker to use message selector
             sender.send(sendmsg);
             sender.close();
             session.close();

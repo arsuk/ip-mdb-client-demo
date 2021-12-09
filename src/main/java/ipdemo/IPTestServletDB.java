@@ -55,7 +55,8 @@ public class IPTestServletDB extends HttpServlet {
     	if (id==null) 
     		data="Records "+dbSessionBean.getTXcount();
     	else {
-    		id=id.replaceAll("\\*", "%");
+    		if (!id.equals("*"))	// Single * is last tx - otherwise treat as %
+    			id=id.replaceAll("\\*", "%");
     		if(key.equals("id") || key.equals("txid"))
     			data=dbSessionBean.getTXinfo(id,key);
     		else
