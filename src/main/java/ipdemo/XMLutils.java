@@ -36,10 +36,14 @@ public class XMLutils {
 	// XML Document help methods - used by other classes as well
 	public static byte[] getTemplate(String file) {
 		byte[] docBytes=null;
-		try {
+		try {	// Try getting file from 'current dir' (allows user to define own XML)
 			docBytes=Files.readAllBytes(Paths.get(file));
 		} catch (IOException | NullPointerException e) {
-			logger.error("IP Get Tamplate failed for path "+new File(file).getAbsolutePath(),e);
+			try {	// Try getting file from war file resource dir WEB-INF/classes
+				docBytes=XMLutils.class.getClassLoader().getResourceAsStream(file).readAllBytes();
+			} catch (Exception ie) {};
+			if (docBytes==null)
+				logger.error("IP Get Template failed for path "+new File(file).getAbsolutePath(),e);
 		}
 		return docBytes;
 	}

@@ -77,9 +77,13 @@ public class IPTestServlet extends HttpServlet {
 		if (destinationName==null) destinationName = "instantpayments_mybank_originator_payment_request";
 
 		byte[] docText=XMLutils.getTemplate(templateFile);
+		
+		if (docText==null) {
+			writer.println("Bad template "+templateFile);
+			return;
+		}
 
 		Document msgDoc = XMLutils.bytesToDoc(docText);
-		if (!templateFile.equals(defaultTemplate)) msgDoc=XMLutils.bytesToDoc(XMLutils.getTemplate(templateFile));
 
 		String resp="TestServlet: "+templateFile+" Value: "+valueStr+" Count: "+cnt+" TPS: "+tps;
 		writer.println(resp+"\n");

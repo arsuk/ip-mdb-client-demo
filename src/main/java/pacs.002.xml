@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pacs.002.001.03" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <FIToFIPmtStsRpt>
+  <GrpHdr>
+   <!-- MsgId, CreDtTm are overwritten. The beneficiary BIC must be set here -->
+   <!-- Other fields can be customized where needed -->
+   <MsgId>123456C58B0556E97CE8FAE7FF250A8AFB7</MsgId>
+   <CreDtTm>2018-12-28T15:25:40.264</CreDtTm>
+   <InstgAgt>
+    <FinInstnId>
+     <!-- BIC should be for beneficiary bank for this instance of test template --> 
+     <BIC>ANDLNL2A</BIC>
+    </FinInstnId>
+   </InstgAgt>
+  </GrpHdr>
+  <OrgnlGrpInfAndSts>
+   <!-- OrgnlMsgId copied from pacs.008 -->
+   <OrgnlMsgId>INNDNL2U20181207009539082</OrgnlMsgId>
+   <OrgnlMsgNmId>pacs.008.001.02</OrgnlMsgNmId>
+   <GrpSts>ACCP</GrpSts>
+  </OrgnlGrpInfAndSts>
+  <TxInfAndSts>
+   <StsId>123456293D</StsId>
+   <!-- Copy Orgnl fields and from AccptncDtTm from pacs.008 -->
+   <OrgnlInstrId>INNDNL2U2018120700953908100000001</OrgnlInstrId>
+   <OrgnlEndToEndId>PT20181228 152539.937000000007465</OrgnlEndToEndId>
+   <OrgnlTxId>PT20181228 152539.937000000007465</OrgnlTxId>
+   <AccptncDtTm>2018-12-28T14:25:39.937Z</AccptncDtTm>
+   <OrgnlTxRef>
+    <PmtTpInf>
+     <SvcLvl>
+      <Cd>SEPA</Cd>
+     </SvcLvl>
+     <LclInstrm>
+      <Cd>INSTTC01</Cd>
+     </LclInstrm>
+    </PmtTpInf>
+    <DbtrAgt>
+                    <!-- BIC copied from pacs.008 -->
+     <FinInstnId>
+      <BIC>ANDLNL2A</BIC>
+     </FinInstnId>
+    </DbtrAgt>
+   </OrgnlTxRef>
+  </TxInfAndSts>
+ </FIToFIPmtStsRpt>
+</Document>
