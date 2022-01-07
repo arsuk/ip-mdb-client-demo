@@ -5,7 +5,7 @@ developers of client implementations.
 It is also a basic test framework that uses the same interfaces that we recommend customers to use. One deployment of
 this application simulates one test bank. You can define more MDBs and queue names to simulate more than one bank.
 
-It consisists of servlets for creating the payment messages and showing the stats of the resulting messages, and message
+It consists of servlets for creating the payment messages and showing the stats of the resulting messages, and message
 driven beans (MDBs) that simulate the client business processes. These are deployed within an instance of Wildfly. The 
 queue names that the beans listen can be defined in the ip-mdb-demo-x.x.war file ejb-jar.xml file. The ActiveMQ connections
 for queues that have to be looked up by the application (send queues) can be defined in the Wildfly or JBoss 
@@ -13,7 +13,7 @@ standalone-amq.xml configuration file. These are:
 1) instantpayments_mybank_originator_payment_request (lookup in the IPTestServlet)
 2) instantpayments_mybank_beneficiary_payment_response (lookup in the IPBeneficiaryRequestBean)
 3) instantpayments_mybank_echo_response (lookup in the IPEchoRequestBean)
-If the filenames are not mapped in the configuration files then the 'mybank' names are used as shown below. It is possble
+If the filenames are not mapped in the configuration files then the 'mybank' names are used as shown below. It is possible
 to define multiple sets of beans to simulate multiple banks if so desired.
 
 The process flow is as follows:
@@ -33,7 +33,7 @@ Note that the queue names used are configurable as described below in the 'Runni
 The IPtestServlet send pacs.008.xml messages test bank beneficiary request queue. Instant Payments will validate the
 message and route it to the requested beneficiary queue. The IPbeneficiaryRequestBean if the beneficiary test bank
 will read them. It will then create the pacs.002.xml response message using a template and it will copy the originator
-fields to the pacs.008 which wll then be send to the beneficiary response queue. Instant Payments will receive the
+fields to the pacs.008 which will then be send to the beneficiary response queue. Instant Payments will receive the
 pacs.002.xml and after validation forward it to the originator response queue. If this test bank is the originator then it
 should get the response in the IPOriginatorResponseBean. The beneficiary test bank will get a confirmation on the
 confirmation queue in the IPbeneficiaryConfirmation bean.
@@ -53,7 +53,7 @@ The IPEchoRequestBean assumes that the response queue has the same name as the M
 with 'response' which allows for multiple bank MDBs and IDs within the demo.
 The example can be run without Instant Payments to simulate and test the queue interactions in a stand alone mode. To do
 this you define in the standalone-amq.xml file that the originator request queue's physical name is the beneficiary queue.
-In this way we bybass the originator request queue and the IPservlet will send its message directly to the 
+In this way we bypass the originator request queue and the IPservlet will send its message directly to the 
 IPbeneficiaryRequestBean. The beneficiary response queue must similarly entry in the standalone-amq.xml must be defined
 with the originator response queue so that the messages are directly send to the IPoriginatorResponseBean.
   
@@ -72,7 +72,7 @@ IPoriginatorResponseBean <-------- instantpayments_mybank_originator_payment_res
 pacs template files
 ===================
 The pacs.008.xml template should be modified to use the BIC of the test bank and the BIC of the creditor bank. The message
-ID and transaction ID will be replaced by the test servlet while creating test messages. The servlet alows you to define a
+ID and transaction ID will be replaced by the test servlet while creating test messages. The servlet allows you to define a
 template parameter so you can have differing versions for a number of beneficiary banks or to test other IP options.
 The pacs.002.xml template must be configured with the test bank's BIC.
 
@@ -92,7 +92,7 @@ There is a an example datasource configured using the H2 database server supplie
 IPTestServlet
 =============
 The servlet creates one or more payment messages. The XML is read from the pacs.008.xml template. It adjusts dates, the
-message IDs and transacionIDs with unique values. The transaction can be provided as a paramter along with the number of
+message IDs and transacionIDs with unique values. The transaction can be provided as a parameter along with the number of
 messages wanted (the count) and the TPS rate at which they should be submitted. The request queue name and BICs can also
 be adjusted by the servlet. The servlet has a parameter for selecting alternative template files so you can test with
 different data values for items that the servlet has no parameters.
@@ -139,3 +139,16 @@ http://localhost:8080/ip-mdb-demo-1.0/stats
 The demo can be configured to run with a database for tracking transactions. It also has log file options. These are configured 
 using system variables and resource definitions in the standalone.xml.
 
+System Property Settings
+------------------------
+The following system properties are available for test purposes like problem / timeout simulation:
+    <property name="IPdatasource" value="jboss/datasources/ExampleDS"/>	# Data source, for example the H2 default Wildfly DB service
+    # Note that the data source is used to log transaction in H2. If this is not wanted set the IPdatasource to an undefined one (e.g. none)
+    <property name="IPRequestDelay" value="0"/>		# Slow down request processing (in ms)
+    <property name="IPResponseDelay" value="0"/>	# Slow down response processing (in ms)
+    <property name="ActiveMQhostStr" value="tcp://localhost:61618"/> # If set, avoid using the Wildfly connection pool for message send
+    # Note that there are also ActiveMQuser and ActiveMQpassword system variables but these are not usually necessary  
+    <property name="ConnectionFactory" value="/jms/ConnectionFactory"/>	# ActimeMQ connection pool for message sends
+    # The above is the name of the example connection pool provided by Wildfly.
+System properties can be set in a standalone.xml file or as parameters on the command line invoking Wildfly. Wildfly standalone examples
+are provided for ActiveMQ (amq), ActiveMQ Artemis (artemis), InVm queues (myfull), with and without an external H2 server. 

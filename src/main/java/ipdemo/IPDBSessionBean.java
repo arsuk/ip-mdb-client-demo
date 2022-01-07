@@ -238,9 +238,11 @@ public class IPDBSessionBean  {
         	InitialContext ctx= new InitialContext();
         	// Get data source (Wildfly naming subsystem <bindings>:
         	// <simple name="java:global/IPdatasource" value="jboss/datasources/ExampleDS"/>
+        	// If not found simply use the Wildfly example DS
 			String datasourceStr=System.getProperty(datasourceProperty);
-			if (datasourceStr==null) datasourceStr=(String)ctx.lookup("/global/"+datasourceProperty);	
-        	ds=(DataSource)ctx.lookup(datasourceStr);// Example: java:jboss/datasources/ExampleDS
+			if (datasourceStr==null) datasourceStr=(String)ctx.lookup("/global/"+datasourceProperty);
+			if (datasourceStr==null) datasourceStr="java:jboss/datasources/ExampleDS"; // Default for Wildfly
+        	ds=(DataSource)ctx.lookup(datasourceStr);
         	// String url = "jdbc:h2:mem:test";
         	// con = DriverManager.getConnection(url,"sa","sa");
         	con = ds.getConnection();	// Connect using datasource username/pwd etc.

@@ -27,24 +27,24 @@
             <type>pom</type>
         </dependency>
 
-<dependency>
-    <groupId>com.h2database</groupId>
-    <artifactId>h2</artifactId>
-    <version>1.4.190</version>
-    <scope>runtime</scope>
-</dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.190</version>
+            <scope>runtime</scope>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>activemq-client</artifactId>
-      <version>5.15.8</version>
-    </dependency>
+        <dependency>
+          <groupId>org.apache.activemq</groupId>
+          <artifactId>activemq-client</artifactId>
+          <version>5.15.8</version>
+        </dependency>
 
-<dependency>
-    <groupId>org.apache.activemq</groupId>
-    <artifactId>activemq-jms-pool</artifactId>
-    <version>5.15.8</version>
-</dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-jms-pool</artifactId>
+            <version>5.15.8</version>
+        </dependency>
 
     </dependencies>
  

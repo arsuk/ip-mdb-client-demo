@@ -47,7 +47,9 @@ public class IPEchoRequestBean implements MessageListener
     
     private Destination requestQueue=null;
     
-	private String defaultTemplate="Echo_Response.xml"; 
+	private String defaultTemplate="Echo_Response.xml";
+	
+	static private boolean firstTime=true;
     
 	SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");	// 2018-12-28T15:25:40.264
     
@@ -136,9 +138,12 @@ public class IPEchoRequestBean implements MessageListener
             	destinationName=destinationName.replace("]","");
             	// Remove Activemq wrapper (if any)
             	destinationName=destinationName.replaceFirst("queue://", "");
-            	// Chane request to response
+            	// Change request to response
             	destinationName=destinationName.replaceFirst("_request$","_response");
             }
+    		if (firstTime) logger.info("Sending to JNDI name: {}",destinationName);
+    		else firstTime=false;
+    		
             Queue responseDest;
             try {
                 Context ic = new InitialContext();

@@ -38,6 +38,7 @@ public class IPOriginatorResponseBean implements MessageDrivenBean, MessageListe
     MessageDrivenContext context;
 
     static FileWriter writer=null;
+    static final int FIVE_SECS=5000;
 
     public static long count=0;
     public static long totalResp=0;
@@ -126,9 +127,11 @@ public class IPOriginatorResponseBean implements MessageDrivenBean, MessageListe
                 }	
 	            if (origTime!=null) {
 	            	long diff=new Date().getTime()-origTime.getTime();
-	            	if (diff>5000) {
+	            	if (diff>FIVE_SECS) {
 	            		lateCount++;	// SLA 5s
 	            		totalLateCount++;
+	            	} else if (diff<0) {
+	            		logger.warn("Time now earlier than acceptance time "+origTimeStr);
 	            	}
 	           		totalResp=totalResp+diff;
 	           		if (diff<minResponse||minResponse==0) minResponse=diff;
