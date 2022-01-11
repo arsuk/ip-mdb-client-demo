@@ -47,9 +47,11 @@ public class IPEchoRequestBean implements MessageListener
     
     private Destination requestQueue=null;
     
+    private String destinationName="instantpayments_mybank_echo_response";
+    
 	private String defaultTemplate="Echo_Response.xml";
 	
-	static private boolean firstTime=true;
+	private boolean firstTime=true;
     
 	SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");	// 2018-12-28T15:25:40.264
     
@@ -129,20 +131,19 @@ public class IPEchoRequestBean implements MessageListener
         	if (requestQueue==null) {
         		requestQueue=msg.getJMSDestination();	// This is the queue to which this MDB is listening
         		logger.info("Listening to: {}",requestQueue);
-        	}
-           	String destinationName="instantpayments_mybank_echo_response";
-            if (requestQueue!=null) {
+
             	destinationName=requestQueue.toString();
             	// Remove Artemis created wrapper (if any)
-            	destinationName=destinationName.replace("ActiveMQQueue[jms.queue.","");
+            	destinationName=destinationName.replace("ActiveMQQueue[","");
+            	destinationName=destinationName.replace("jms.queue.","");
             	destinationName=destinationName.replace("]","");
             	// Remove Activemq wrapper (if any)
             	destinationName=destinationName.replaceFirst("queue://", "");
             	// Change request to response
             	destinationName=destinationName.replaceFirst("_request$","_response");
+            	
+            	logger.info("Sending to JNDI name: {}",destinationName);
             }
-    		if (firstTime) logger.info("Sending to JNDI name: {}",destinationName);
-    		else firstTime=false;
     		
             Queue responseDest;
             try {

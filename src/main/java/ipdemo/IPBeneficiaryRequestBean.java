@@ -227,7 +227,8 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             if (requestQueue!=null) {
             	destinationName=requestQueue.toString();
             	// Remove Artemis created wrapper (if any)
-            	destinationName=destinationName.replace("ActiveMQQueue[jms.queue.","");
+            	destinationName=destinationName.replace("ActiveMQQueue[","");
+            	destinationName=destinationName.replace("jms.queue.","");
             	destinationName=destinationName.replace("]","");
             	// Remove Activemq wrapper (if any)
             	destinationName=destinationName.replaceFirst("queue://", "");
