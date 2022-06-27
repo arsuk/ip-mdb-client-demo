@@ -8,20 +8,12 @@ import org.w3c.dom.Element;
 import javax.annotation.PostConstruct;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.EJB;
-import javax.ejb.EJBException;
 import javax.ejb.MessageDriven;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import javax.jms.Queue;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueSender;
-import javax.jms.QueueSession;
 import javax.jms.TextMessage;
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -42,16 +34,12 @@ import java.util.Date;
 public class IPEchoRequestBean implements MessageListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(IPEchoRequestBean.class);
-
-    private QueueConnectionFactory qcf;
     
     private Destination requestQueue=null;
     
     private String destinationName="instantpayments_mybank_echo_response";
     
 	private String defaultTemplate="Echo_Response.xml";
-	
-	private boolean firstTime=true;
     
 	SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");	// 2018-12-28T15:25:40.264
     
@@ -62,38 +50,12 @@ public class IPEchoRequestBean implements MessageListener
     
 	public IPEchoRequestBean() {
 		
-		// Try to open a private pool (not-managed by Wildfly/JBoss). If null when not defined, will allocate a container managed pool later
-    	try { 
-            InitialContext iniCtx = new InitialContext();
-
-			qcf=PrivatePool.createPrivatePool(iniCtx,logger);	// Null if not configured in standalone.xml
-		} catch (javax.naming.NameNotFoundException je) {
-			// Do nothing if no logfile name defined
-		} catch (NamingException e) {
-            logger.error("Activemq factory {}",e.getMessage());
-            throw new EJBException(e);
-		}
 	}
 
     @PostConstruct
     public void ejbCreate()
     {
-        try {
-            // Create connection for replies and forwards
-            InitialContext iniCtx = new InitialContext();
-
-            if (qcf==null) {
-            	// Use the application server ActiveMQ connection pool
-                qcf = ManagedPool.getPool(iniCtx,logger);
-            }
-            try {
-            	docText= XMLutils.getTemplate(defaultTemplate);
-            } catch (Exception e) {
-            	logger.error("Init Error",e);
-            }
-        } catch (NamingException e) {
-            throw new EJBException("IPEchoRequest Init Exception ", e);
-        }
+    	docText= XMLutils.getTemplate(defaultTemplate);
     }
 
     public void onMessage(Message msg)
@@ -122,11 +84,6 @@ public class IPEchoRequestBean implements MessageListener
             String origInstId=XMLutils.getElementValue(msgdoc,"InstrId");
             XMLutils.setElementValue(replydoc,"OrgnlInstrId",origInstId);
             
-            // Get a pooled connection
-            QueueConnection conn = qcf.createQueueConnection();
-            conn.start();
-            QueueSession session = conn.createQueueSession(false,
-                        QueueSession.AUTO_ACKNOWLEDGE);
             // Look up input destination - use the input request queue queue name and make it a response queue name
         	if (requestQueue==null) {
         		requestQueue=msg.getJMSDestination();	// This is the queue to which this MDB is listening
@@ -145,20 +102,10 @@ public class IPEchoRequestBean implements MessageListener
             	logger.info("Sending to JNDI name: {}",destinationName);
             }
     		
-            Queue responseDest;
-            try {
-                Context ic = new InitialContext();
-            	responseDest = (Queue)ic.lookup(destinationName);
-        	} catch (NamingException e) {
-                responseDest = session.createQueue(destinationName);
-            }
-            QueueSender sender = session.createSender(responseDest);
-            TextMessage sendmsg = session.createTextMessage(XMLutils.documentToString(replydoc));
-            sender.send(sendmsg);
-            sender.close();    	
-            conn.close();	// Return connection to the pool
-        } catch(JMSException | IOException e) {
-            throw new EJBException(e);
+        	MessageUtils.sendMessage(XMLutils.documentToString(replydoc),destinationName);
+
+        } catch(JMSException | IOException | NamingException e) {
+            logger.error("Unexpected error "+e);
         }
     }
 }

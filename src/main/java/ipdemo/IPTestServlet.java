@@ -5,12 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -104,52 +98,15 @@ public class IPTestServlet extends HttpServlet {
 			if (msgDoc==null)
 				writer.println("Missing document template "+templateFile+"\n");
 			else {
-				Context ic;
-				ConnectionFactory cf;
-				Connection connection = null;
 
 				try {
-					ic = new InitialContext();
 
-					String servletHost=System.getProperty("ActiveMQhostStr");
-					if (servletHost!=null) {
-						logger.info("Using host "+servletHost);
-						String user=System.getProperty("ActiveMQuser");
-						if (user!=null) logger.info("Using user name "+user);
-						String password=System.getProperty("ActiveMQpassword");
-						cf=new ActiveMQConnectionFactory(user,password,servletHost);					
-					} else {
-						String cfStr=System.getProperty("ConnectionFactory");
-						if (cfStr==null) cfStr="/ConnectionFactory";
-						logger.info("Using "+cfStr);
-						cf = (ConnectionFactory)ic.lookup(cfStr);
-					}
-					// Context lookup - JNDI name of destination must be in the ActiveMQ resource-adapter as a admin-object, or
-					// it must be messaging server subsystem as a jms-queue with JBoss / wildfly embedded AMQ 
-					connection = cf.createConnection();
-					Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		            Queue queue;
-		            try {
-		            	queue = (Queue)ic.lookup(destinationName);
-		        	} catch (NamingException e) {
-		                queue = session.createQueue(destinationName);            	
-		            }
-					MessageProducer publisher = session.createProducer(queue);
-
-					connection.start();
-					logger.info("Connected - queue "+queue);
-					/**
-					 * A session bean that implements all DB queries for the demo. If no datasource is defined as (due to error or because no IPdatasource
-					 * property is defined) then no DB is used by the demo. Queries and updates are ignored.
-					 * @author Allan Smith
-					 *
-					 */				
-					TextMessage message = session.createTextMessage();
-
+	
 					long startTime=System.currentTimeMillis();
                     int startTPS=1;
 
 					for (sendCnt=0;sendCnt<cnt&&!stopFlag;sendCnt++) {
+						
 						// Set msgDoc test values...
 						XMLutils.setElementValue(msgDoc,"MsgId",hashCode()+"-"+startTime);
 						XMLutils.setElementValue(msgDoc,"CreDtTm",dateTimeFormat.format(new Date()));
@@ -159,7 +116,7 @@ public class IPTestServlet extends HttpServlet {
 						XMLutils.setElementValue(msgDoc,"AccptncDtTm",dateTimeFormatGMT.format(new Date())+"Z");
 						XMLutils.setElementValue(msgDoc,"IntrBkSttlmAmt",valueStr);
 						String TxId="TX"+dateFormat.format(new Date())+" "+System.nanoTime();
-						TxId=TxId.replaceAll("-", "");
+						TxId=TxId.replaceAll("-", "")+sendCnt;
 						XMLutils.setElementValue(msgDoc,"TxId",TxId);
 						XMLutils.setElementValue(msgDoc,"EndToEndId",TxId);
 						if (debtorBIC!=null) {	// If specified, override template value
@@ -169,9 +126,8 @@ public class IPTestServlet extends HttpServlet {
 						if (creditorBIC!=null)	// If specified, override template value          
 			            	XMLutils.setElementValue(XMLutils.getElement(msgDoc,"CdtrAgt"),"BIC",creditorBIC);
 
-						message.setText(XMLutils.documentToString(msgDoc));
 						long now=System.currentTimeMillis();
-						publisher.send(message);
+						MessageUtils.sendMessage(XMLutils.documentToString(msgDoc),destinationName);
 						totalMsgSendTime=totalMsgSendTime+(System.currentTimeMillis()-now);
 						if (trace>0 && sendCnt%trace==0) logger.info("Message sent "+sendCnt+" "+XMLutils.getElementValue(msgDoc,"CreDtTm"));
 						totalSendCount++;
@@ -205,20 +161,8 @@ public class IPTestServlet extends HttpServlet {
 				} catch (javax.naming.NameNotFoundException e) {
 					logger.error("Error: "+e);
 					writer.println("Context lookup exception: "+e+"\n");
-				} catch (javax.jms.IllegalStateException e) {
-					logger.error("Closing: "+e);
-				} catch (javax.jms.ResourceAllocationException e) {
-					logger.error("Resource error "+e);
 				} catch (Exception e) {
 					throw new RuntimeException(e);
-				} finally {
-					if (connection !=null) {
-						try {
-							connection.close();
-						} catch (JMSException e) {
-							throw new RuntimeException(e);
-						}
-					}
 				}
 
 			}

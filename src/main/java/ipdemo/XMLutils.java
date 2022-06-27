@@ -40,7 +40,11 @@ public class XMLutils {
 			docBytes=Files.readAllBytes(Paths.get(file));
 		} catch (IOException | NullPointerException e) {
 			try {	// Try getting file from war file resource dir WEB-INF/classes
-				docBytes=XMLutils.class.getClassLoader().getResourceAsStream(file).readAllBytes();
+				logger.warn("Class template "+file);
+			    InputStream is = XMLutils.class.getClassLoader().getResourceAsStream(file);
+			    docBytes = new byte[is.available()];
+			    is.read(docBytes);
+				// docBytes=XMLutils.class.getClassLoader().getResourceAsStream(file).readAllBytes();	// Java 9 version
 			} catch (Exception ie) {};
 			if (docBytes==null)
 				logger.error("IP Get Template failed for path "+new File(file).getAbsolutePath(),e);

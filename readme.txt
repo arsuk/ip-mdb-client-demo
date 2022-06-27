@@ -5,6 +5,10 @@ developers of client implementations.
 It is also a basic test framework that uses the same interfaces that we recommend customers to use. One deployment of
 this application simulates one test bank. You can define more MDBs and queue names to simulate more than one bank.
 
+Example standalome.xml files are included showing how use the war file wuth Wildfly/JBoss in a standalone mode 
+in-vm JMS messaging (myfull) or with external ActiveMQ (amq) or with external ActiveMQ Artemis (artemis) and also
+varuiations to use a an external DB data source (h2). 
+
 It consists of servlets for creating the payment messages and showing the stats of the resulting messages, and message
 driven beans (MDBs) that simulate the client business processes. These are deployed within an instance of Wildfly. The 
 queue names that the beans listen can be defined in the ip-mdb-demo-x.x.war file ejb-jar.xml file. The ActiveMQ connections

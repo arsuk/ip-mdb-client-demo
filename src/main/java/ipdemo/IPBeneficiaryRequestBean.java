@@ -15,14 +15,8 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import javax.jms.Queue;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueSender;
-import javax.jms.QueueSession;
+
 import javax.jms.TextMessage;
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import java.text.SimpleDateFormat;
@@ -44,7 +38,6 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
 	private static final Logger logger = LoggerFactory.getLogger(IPBeneficiaryRequestBean.class);
 
     private MessageDrivenContext ctx = null;
-    private QueueConnectionFactory qcf;	// To get outgoing connections for sending messages
     
     private int rejectLimit=100;
     
@@ -63,16 +56,6 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
     
 	public IPBeneficiaryRequestBean() {
 
-		// Try to open a private pool (not-managed by Wildfly/JBoss). If null when not defined, will allocate a container managed pool later
-     	try {
-			InitialContext iniCtx = new InitialContext(); 				
-
-			qcf = PrivatePool.createPrivatePool(iniCtx,logger);	// Null if not configured in standalone.xml
-		} catch (javax.naming.NameNotFoundException je) {
-			logger.debug("Factory naming error "+je);
-		} catch (Exception e) {
-			logger.error("Activemq factory "+e);
-		};
 	}
 
     public void setMessageDrivenContext(MessageDrivenContext ctx)
@@ -83,23 +66,11 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
     
     public void ejbCreate()
     {
-    	// Check for pooled connection factory created directly with ActiveMQ above or
-    	// get a pool defined in the standalone.xml.
-        try {
-            // Create connection for replies and forwards
-            InitialContext iniCtx = new InitialContext();
 
-            if (qcf==null) {
-                qcf = ManagedPool.getPool(iniCtx,logger);
-            }
-
-            // Get XML template for creating messages from a file - real application code would have a better way of doing this
-            docText=XMLutils.getTemplate(defaultTemplate);
+        docText=XMLutils.getTemplate(defaultTemplate);
             
-	       	logger.info("Started");
-        } catch (Exception e) {
-            throw new EJBException("Init Exception ", e);
-        }
+       	logger.info("Started");
+
     }
 
     public void ejbRemove()
@@ -216,11 +187,6 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             // Work / slowness simulation - time specified if numeric value passed with pacs.008 in remittance info
            	try {Thread.sleep(workTime);} catch (InterruptedException ie) {logger.error("Sleep "+ie);};
 
-            // Get a pooled connection
-            QueueConnection conn = qcf.createQueueConnection();
-            conn.start();
-            QueueSession session = conn.createQueueSession(false,
-                        QueueSession.AUTO_ACKNOWLEDGE);
             // Look up destination - use the input request queue queue name and make it a response queue name
         	String destinationName="instantpayments_mybank_beneficiary_payment_response";	// Default if input queue not found
             Destination requestQueue=msg.getJMSDestination();
@@ -232,27 +198,15 @@ public class IPBeneficiaryRequestBean implements MessageDrivenBean, MessageListe
             	destinationName=destinationName.replace("]","");
             	// Remove Activemq wrapper (if any)
             	destinationName=destinationName.replaceFirst("queue://", "");
-            	// Chane request to response
+            	// Change request to response
             	destinationName=destinationName.replaceFirst("_request$","_response");
             }
-            Queue responseDest;
-            try {	// Try looking up the name in the context case it is a JNDI name 
-                Context ic = new InitialContext();
-            	responseDest = (Queue)ic.lookup(destinationName);
-        	} catch (NamingException e) {
-                responseDest = session.createQueue(destinationName);            	
-            }           
-            QueueSender sender = session.createSender(responseDest);
-            TextMessage sendmsg = session.createTextMessage(XMLutils.documentToString(doc));
-            sendmsg.setJMSType(status); // Allows for broker to use message selector
-            sender.send(sendmsg);
-            sender.close();
-            session.close();
-            conn.close();	// Return connection to the pool
+            
+            MessageUtils.sendMessage(XMLutils.documentToString(doc),destinationName,status);
            
             // Throw exception on bad value to test rollback error handling - real applications code would reject the message
             if (value<0 && !msg.getJMSRedelivered()) throw new EJBException(new RuntimeException("Bad tx "+txid+" value "+value));           
-        } catch(JMSException e) {
+        } catch(JMSException | NamingException e) {
             throw new EJBException(e);
 		}
     }

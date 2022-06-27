@@ -175,12 +175,12 @@ public class IPDBSessionBean  {
 				con = ds.getConnection();
 				st = con.createStatement();
 				String sql;
-				if (id.equals("%")) {
+				if (id.equals("*")) {
 					sql = "TRUNCATE TABLE TXTABLE";
 					data="Truncated "+getTXcount(); 
 					st.executeUpdate(sql);
 				} else {
-					if (!key.equalsIgnoreCase("ID")&&!key.equalsIgnoreCase("ID"))
+					if (!key.equalsIgnoreCase("ID")&&!key.equalsIgnoreCase("TXID"))
 						key="ID";
 					sql = "DELETE FROM TXTABLE WHERE "+key+" LIKE '" + id + "'";
 					st.executeUpdate(sql);

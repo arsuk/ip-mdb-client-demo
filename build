@@ -1,5 +1,0 @@
-mvn clean
-mvn package
-cp target/ip-mdb-demo-1.0.war .
-echo If you want a deployment for ActiveMQ or the integrated Wildfly/Artemis delete the jboss-ejb3.xml from the WEB-INF folder of the war file!
-

@@ -1,1 +1,0 @@
-cp target/ip-mdb-simple-demo-1.0.artemis.war /opt/wildfly/standalone/deployments/ip-mdb-demo-1.0.war
